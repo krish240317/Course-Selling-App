@@ -2,7 +2,8 @@ import { User } from "../models/user.models.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
-import {generateAccessToken} from '../utils/TokenGenerate.js'
+import { generateAccessAndRefreshToken } from '../utils/TokenGenerate.js'
+import bcrypt, { compare } from "bcrypt";
 
 export const signup = asyncHandler(async (req, res) => {
 
@@ -39,13 +40,7 @@ export const signup = asyncHandler(async (req, res) => {
 })
 
 
-
-// const generateAccessToken=(user_id)=>{
-// //     const 
-// // }
-
-
-const login = asyncHandler(async (req, res) => {
+export const login = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({
@@ -61,5 +56,30 @@ const login = asyncHandler(async (req, res) => {
         throw new ApiError(401, "Invalid password");
     }
 
-    const { accessToken } = generateAccessToken(user);
+    const { accessToken } = await generateAccessAndRefreshToken(user);
+
+    const options = {
+        httpOnly: true,
+        secure: true,
+    };
+    const logedInUser = user;
+    console.log(accessToken);
+    return res
+        .cookie("accessToken", accessToken, options)
+        .json(
+            new ApiResponse(
+                200,
+                {
+                    user: logedInUser,
+                    accessToken
+                },
+                "User Loggedin Successfully"
+            )
+        )
+
 })
+export const checkk=async(req,res)=>{
+    const users=req.user.email;
+    // console.log(users)
+    res.json(new ApiResponse(200,"OKKKKKKKKKKKKK"));
+}
