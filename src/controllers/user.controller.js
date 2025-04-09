@@ -46,6 +46,7 @@ export const login = asyncHandler(async (req, res) => {
     const user = await User.findOne({
         $and: [{ email }]
     })
+    console.log(user);
     if (!user) {
         throw new ApiError(400, "User not Found Incorrect Email OR Password");
     }
@@ -80,6 +81,6 @@ export const login = asyncHandler(async (req, res) => {
 })
 export const checkk=async(req,res)=>{
     const users=req.user.email;
-    // console.log(users)
-    res.json(new ApiResponse(200,"OKKKKKKKKKKKKK"));
+    console.log(users)
+    res.json(new ApiResponse(200,[users],"OKKKKKKKKKKKKK"));
 }
