@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser';
 import userRouter from './routers/routes.js'
+import instructorRouter from './routers/instructor.routes.js'
 
 const app=express();
 
@@ -15,6 +16,7 @@ app.use(express.static("public"));
 app.use(cookieParser());  //to access and set user browser cookies
 
 //Declare Routes 
-app.use("/api",userRouter);
+app.use("/lms",userRouter);
+app.use("/lms",instructorRouter);
 
 export {app}

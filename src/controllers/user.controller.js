@@ -7,15 +7,15 @@ import bcrypt, { compare } from "bcrypt";
 
 export const signup = asyncHandler(async (req, res) => {
 
-    const { username, email, password, fullName } = req.body;
+    const { name, email, password, role } = req.body;
 
-    if ([username, email, password, fullName].some((field) => field?.trim() === "")) {
+    if ([name, email, password, role].some((field) => field?.trim() === "")) {
         throw new ApiError(400, "All Fields are Required");
     }
 
     // Added await here
     const existUser = await User.findOne({
-        $or: [{ username }, { email }]
+        $or: [{ name }, { email }]
     })
 
     if (existUser) {
@@ -23,11 +23,11 @@ export const signup = asyncHandler(async (req, res) => {
     }
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({
-        username,
+    const user = await  User.create({
+        name,
         email,
         password: hashedPassword,
-        fullName
+        role
     });
 
     // Added await and fixed the query to use findById
