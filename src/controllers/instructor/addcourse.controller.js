@@ -1,89 +1,112 @@
-import React from 'react'
+import React from 'react';
 import { asyncHandler } from '../../utils/asyncHandler.js';
-import { Course } from '../../models/course.models.js'
+import { Course } from '../../models/course.models.js';
 import { ApiResponse } from '../../utils/ApiResponse.js';
-import B2 from 'backblaze-b2'
-
+import B2 from 'backblaze-b2';
+import FormData from 'form-data';
+import axios from 'axios';
+import { Buffer } from 'buffer'; 
 
 export const addcourse = asyncHandler(async (req, res) => {
-  const InstructorId = req.user._id;
-  // console.log("J",InstructorId);
-  const { title, description, category, price } = req.body;
+  try {
+    const InstructorId = req.user._id;
+    const { title, description, category, price } = req.body;
 
-  const addedcourse = await Course.create({
-    title,
-    description,
-    category,
-    price,
-    instructor: InstructorId,
-  })
+    const addedcourse = await Course.create({
+      title,
+      description,
+      category,
+      price,
+      instructor: InstructorId,
+    });
 
-  const confirm = await Course.findById(addedcourse._id);
+    const confirm = await Course.findById(addedcourse._id);
 
-  return res
-    .json(new ApiResponse(200, confirm, "title,description,category added Successfully"));
-})
+    return res.json(
+      new ApiResponse(200, confirm, 'title,description,category added Successfully')
+    );
+  } catch (error) {
+    console.error('Error adding course:', error);
+    return res.status(500).json(new ApiResponse(500, null, 'Internal Server Error'));
+  }
+});
 
 export const addContent = asyncHandler(async (req, res) => {
+  try {
+    const { subtitle } = req.body;
+    console.log(subtitle);
+    const instructorId = req.user._id;
+    const file = req.file;
 
-  const { subtitle } = req.body;
-  console.log(subtitle);
-  const b2 = new B2({
-    applicationKeyId: process.env.B2_KEY_ID,
-    applicationKey: process.env.B2_APP_KEY,
-  });
+    if (!file) {
+      return res.status(400).send('No file uploaded.');
+    }
 
+    const fileName = Date.now() + '-' + file.originalname;
 
-  const instructorId = req.user._id;
-  const file = req.file;
-  if (!file) return res.status(400).send('No file uploaded.');
+    // Prepare form data for PixelDrain
+    const form = new FormData();
+    form.append('file', file.buffer, {
+      filename: fileName,
+      contentType: file.mimetype,
+    });
 
-  await b2.authorize();
+    let response;
+    console.log("KEY",process.env.PIXELDRAIN_API_KEY);
+    try {
+      response = await axios.post('https://pixeldrain.com/api/file', form, {
+        headers: {
+          ...form.getHeaders(),
+          Authorization: `Basic ${Buffer.from(`:${process.env.PIXELDRAIN_API_KEY}`).toString('base64')}`,        },
+      });
+    } catch (uploadError) {
+      console.error('Error uploading file to PixelDrain:', uploadError);
+      return res
+        .status(500)
+        .json(new ApiResponse(500, null, 'Failed to upload file to PixelDrain'));
+    }
 
-  const fileName = Date.now() + '-' + file.originalname;
+    const pixeldrainId = response.data.id;
+    const fileLink = `https://pixeldrain.com/u/${pixeldrainId}`;
 
-  const { data: uploadUrlData } = await b2.getUploadUrl({
-    bucketId: process.env.B2_BUCKET_ID,
-  });
+    let course;
+    try {
+      course = await Course.findOne({ instructor: instructorId });
+      if (!course) {
+        throw new Error('Course not found');
+      }
+    } catch (findError) {
+      console.error('Error finding course:', findError);
+      return res.status(404).json(new ApiResponse(404, null, 'Course not found'));
+    }
 
-  await b2.uploadFile({
-    uploadUrl: uploadUrlData.uploadUrl,
-    uploadAuthToken: uploadUrlData.authorizationToken,
-    fileName: fileName,
-    data: file.buffer,
-    contentType: file.mimetype,
-  });
-
-  // Generate signed URL
-  const { data } = await b2.getDownloadAuthorization({
-    bucketId: process.env.B2_BUCKET_ID,
-    fileNamePrefix: fileName,
-    validDurationInSeconds: 3600,
-  });
-
-  const signedURL = `https://f000.backblazeb2.com/file/${process.env.B2_BUCKET_NAME}/${fileName}?Authorization=${data.authorizationToken}`;
-
-  const course = await Course.findOne({ instructor: instructorId });
-  if (!course) {
-    throw new ApiError(404, "Course not found");
-  }
-
-
-  const updatedCourse = await Course.findByIdAndUpdate(
-    course._id, // Use the course ID found earlier
-    {
-      $push: {
-        content: {
-          subtitle,
-          type:"video",
-          url: signedURL, // Add the generated URL to the content
+    let updatedCourse;
+    try {
+      updatedCourse = await Course.findByIdAndUpdate(
+        course._id,
+        {
+          $push: {
+            content: {
+              subtitle,
+              type: 'video',
+              url: fileLink,
+            },
+          },
         },
-      },
-    },
-    { new: true } // Return the updated course
-  );
-// ........................................................ Continue from hereeeee
-  return res
-    .json(new ApiResponse(200, signedURL,updatedCourse, "Successfully added video"));
+        { new: true }
+      );
+    } catch (updateError) {
+      console.error('Error updating course:', updateError);
+      return res
+        .status(500)
+        .json(new ApiResponse(500, null, 'Failed to update course content'));
+    }
 
-})
+    return res.json(
+      new ApiResponse(200, fileLink, updatedCourse, 'Successfully added video')
+    );
+  } catch (error) {
+    console.error('Error in addContent:', error);
+    return res.status(500).json(new ApiResponse(500, null, 'Internal Server Error'));
+  }
+});
