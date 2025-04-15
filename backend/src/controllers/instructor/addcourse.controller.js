@@ -1,11 +1,9 @@
-import React from 'react';
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import { Course } from '../../models/course.models.js';
 import { ApiResponse } from '../../utils/ApiResponse.js';
-import B2 from 'backblaze-b2';
 import FormData from 'form-data';
 import axios from 'axios';
-import { Buffer } from 'buffer'; 
+import { Buffer } from 'buffer';
 
 export const addcourse = asyncHandler(async (req, res) => {
   try {
@@ -52,12 +50,13 @@ export const addContent = asyncHandler(async (req, res) => {
     });
 
     let response;
-    console.log("KEY",process.env.PIXELDRAIN_API_KEY);
+    console.log("KEY", process.env.PIXELDRAIN_API_KEY);
     try {
       response = await axios.post('https://pixeldrain.com/api/file', form, {
         headers: {
           ...form.getHeaders(),
-          Authorization: `Basic ${Buffer.from(`:${process.env.PIXELDRAIN_API_KEY}`).toString('base64')}`,        },
+          Authorization: `Basic ${Buffer.from(`:${process.env.PIXELDRAIN_API_KEY}`).toString('base64')}`,
+        },
       });
     } catch (uploadError) {
       console.error('Error uploading file to PixelDrain:', uploadError);
