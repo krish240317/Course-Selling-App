@@ -7,6 +7,7 @@ import Input from "./Input";
 import Button from "./Button";
 import Select from "./Select";
 import Container from "./container/Container";
+import Logo from "./Logo";
 export {
     Header,
     Footer,
@@ -16,6 +17,7 @@ export {
     Input,
     Button,
     Select,
-    Container
+    Container,
+    Logo
 
 }

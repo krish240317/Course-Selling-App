@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {Input,Button,Select} from './index.js';
+import {Input,Button,Logo} from './index.js';
 import '../css/Signup.css';
 import { useForm } from 'react-hook-form';
 import {Link} from "react-router-dom"
@@ -20,7 +20,11 @@ const Login = () => {
   return (
     <div className="signup-container">
       <form className="signup-form" onSubmit={handleSubmit(onSubmit)}>
-        <h2>Login to your account</h2>
+      <span className="logo-container">
+          <Logo />
+        </span>
+        <h2 className="signup-title">Login to your account</h2>
+     
 
         <p className="mt-2 text-center text-base text-black/60">
           Don't have an account?&nbsp;

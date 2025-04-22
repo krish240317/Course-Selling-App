@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import {Input,Button,Select} from './index.js';
+import { Input, Button, Select, Logo } from './index.js';
 import '../css/Signup.css';
 import { useForm } from 'react-hook-form';
-import {Link} from "react-router-dom"
+import { Link } from "react-router-dom"
 
 const Signup = () => {
   const {
@@ -18,17 +18,19 @@ const Signup = () => {
   return (
     <div className="signup-container">
       <form className="signup-form" onSubmit={handleSubmit(onSubmit)}>
-      <h2>Sign up to create account</h2>
-      
-                <p className="mt-2 text-center text-base text-black/60">
-                    Already have an account?&nbsp;
-                    <Link
-                        to="/login"
-                        className="font-medium text-primary transition-all duration-200 hover:underline"
-                    >
-                        Sign In
-                    </Link>
-                </p>
+        <span className="logo-container">
+          <Logo />
+        </span>
+        <h2 className="signup-title">Sign up to create account</h2>
+        <p className="mt-2 text-center text-base text-black/60">
+          Already have an account?&nbsp;
+          <Link
+            to="/login"
+            className="font-medium text-primary transition-all duration-200 hover:underline"
+          >
+            Sign In
+          </Link>
+        </p>
 
         <div className="input-group">
           <Input
