@@ -1,0 +1,40 @@
+.header {
+    padding: 1rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #6b7280; /* Equivalent to bg-gray-500 */
+  }
+  
+  .nav {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo-container {
+    margin-right: 1rem;
+  }
+  
+  .nav-items {
+    display: flex;
+    margin-left: auto;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .nav-items li {
+    margin-left: 1rem;
+  }
+  
+  .nav-button {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    transition: background-color 0.2s ease-in-out;
+    border-radius: 9999px; /* Equivalent to rounded-full */
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .nav-button:hover {
+    background-color: #bfdbfe; /* Equivalent to hover:bg-blue-100 */
+  }
