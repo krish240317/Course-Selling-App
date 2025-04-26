@@ -19,7 +19,7 @@ const Signup = () => {
     <div className="signup-container">
       <form className="signup-form" onSubmit={handleSubmit(onSubmit)}>
         <span className="logo-container">
-          <Logo />
+         <Link to={"/"}> <Logo size={40}/></Link>
         </span>
         <h2 className="signup-title">Sign up to create account</h2>
         <p className="mt-2 text-center text-base text-black/60">

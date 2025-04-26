@@ -8,6 +8,7 @@ import Button from "./Button";
 import Select from "./Select";
 import Container from "./container/Container";
 import Logo from "./Logo";
+import HomePage from "./Home";
 export {
     Header,
     Footer,
@@ -18,6 +19,7 @@ export {
     Button,
     Select,
     Container,
-    Logo
+    Logo,
+    HomePage
 
 }
