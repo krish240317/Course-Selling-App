@@ -13,6 +13,7 @@ const Header = () => {
     { name: 'Home', slug: "/", active: true },
     { name: "Login", slug: "/login", active: !authStatus },
     { name: "Signup", slug: "/signup", active: !authStatus },
+    { name: "Addcontent", slug: "/addcontent", active: authStatus },
   ]
 
   return (

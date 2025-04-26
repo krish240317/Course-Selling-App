@@ -24,5 +24,4 @@ export {
     Logo,
     HomePage,
     AddContent,
-
 }
