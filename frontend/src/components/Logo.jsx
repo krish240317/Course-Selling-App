@@ -5,7 +5,7 @@ import { IoLogoWebComponent } from "react-icons/io5"
 function Logo({ size }) { // Default size is 24 if no size is provided
   return (
     <>
-      <IoLogoWebComponent style={{ height: `${size}px`, width: `${size}px` }} />
+      <IoLogoWebComponent style={{ height: `${size}px`, width: `${size}px`, color:'black' }} />
     </>
   )
 }

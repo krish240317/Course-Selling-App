@@ -1,6 +1,6 @@
 import Header from "./Header/Header";
 import Footer from "./Footer/Footer";
-import AppLayout from "./AppLayout";
+import AppLayout from "./AuthLayout";
 import Login from "./Login";
 import Signup from "./Signup";
 import Input from "./Input";
@@ -9,6 +9,8 @@ import Select from "./Select";
 import Container from "./container/Container";
 import Logo from "./Logo";
 import HomePage from "./Home";
+import AddContent from "./AddContent";
+
 export {
     Header,
     Footer,
@@ -20,6 +22,7 @@ export {
     Select,
     Container,
     Logo,
-    HomePage
+    HomePage,
+    AddContent,
 
 }
