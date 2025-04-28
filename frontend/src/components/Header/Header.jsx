@@ -14,6 +14,7 @@ const Header = () => {
     { name: "Login", slug: "/login", active: !authStatus },
     { name: "Signup", slug: "/signup", active: !authStatus },
     { name: "Addcontent", slug: "/addcontent", active: authStatus },
+    { name: "Dashboard", slug: "/dashboard", active: authStatus },
   ]
 
   return (

@@ -9,6 +9,7 @@ import Store from "./store/store"
 import { Provider } from 'react-redux'
 import Protected from './components/AuthLayout'
 import AddContent from './pages/AddContent'
+import Dashboard from './pages/Dashboard'
 const App = () => {
   return (
     <>
@@ -18,9 +19,10 @@ const App = () => {
         <BrowserRouter>
           <Header />
           <Routes>
-            <Route path="/" element={<Protected authentication={false}><Home /></Protected>} />
+            <Route path="/" element={<Home />} />
             <Route path="/signup" element={<Protected authentication={false}><Signup /></Protected>} />
             <Route path="/login" element={<Protected authentication={false}><Login /></Protected>} />
+            <Route path="/dashboard" element={<Protected authentication><Dashboard /></Protected>} />
             <Route path="/addcontent" element={<Protected authentication><AddContent /></Protected>} />
           </Routes>
           <Footer />

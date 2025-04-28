@@ -46,7 +46,7 @@ export const login = asyncHandler(async (req, res) => {
     const user = await User.findOne({
         $and: [{ email }]
     })
-    console.log(user);
+    // console.log(user);
     if (!user) {
         throw new ApiError(400, "User not Found Incorrect Email OR Password");
     }

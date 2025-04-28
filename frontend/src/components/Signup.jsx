@@ -2,24 +2,42 @@ import React, { useState } from 'react';
 import { Input, Button, Select, Logo } from './index.js';
 import '../css/Signup.css';
 import { useForm } from 'react-hook-form';
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import axios from "axios"
 
 const Signup = () => {
+
+  const navigate=useNavigate();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
-    console.log('Form Data:', data);
+  const onSubmit = async (data) => {
+    try {
+      const response = await axios.post(`${String(import.meta.env.VITE_API_URL)}/signup`, data, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.data.success) {
+        alert("Sign-up successful!");
+        navigate('/login');
+      } else {
+        alert("Sign-up unsccessful!");
+      }
+    } catch (error) {
+      console.error('Error:', error.response?.data || error.message);
+    }
   };
 
   return (
     <div className="signup-container">
       <form className="signup-form" onSubmit={handleSubmit(onSubmit)}>
         <span className="logo-container">
-         <Link to={"/"}> <Logo size={40}/></Link>
+          <Link to={"/"}> <Logo size={40} /></Link>
         </span>
         <h2 className="signup-title">Sign up to create account</h2>
         <p className="mt-2 text-center text-base text-black/60">
@@ -81,7 +99,7 @@ const Signup = () => {
           <Select
             label="Role"
             name="role"
-            options={['Instructor', 'Student']}
+            options={['instructor', 'student']}
             {...register('role', { required: 'Role is required' })}
             className="input-field"
           />

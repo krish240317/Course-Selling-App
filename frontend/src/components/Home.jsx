@@ -1,24 +1,32 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import {Logo} from "./index";
+import { Logo } from "./index";
+import { useSelector } from "react-redux";
 
 const HomePage = () => {
+
+  const authStatus = useSelector((state) => state.auth.status)
+
   return (
     <div className="min-h-screen bg-white text-gray-800">
       {/* Hero Section */}
       <section className="flex flex-col items-center justify-center text-center py-24 px-4 bg-blue-50">
         <h1 className="text-5xl font-bold mb-4">Welcome to LMS
-          
+
           <div className="flex justify-center items-center my-6">
-          <Logo style={{}} />
-        </div>
+            <Logo style={{}} />
+          </div>
         </h1>
         <p className="text-lg text-gray-600 mb-8 max-w-xl">
           A modern platform to manage your courses and content seamlessly.
         </p>
-        <button className="bg-blue-600 text-white px-6 py-3 rounded-xl text-lg hover:bg-blue-700 transition">
-          <Link to={'/signup'}>Get Started</Link>
-        </button>
+
+        {!authStatus && (
+          <button className="bg-blue-600 text-white px-6 py-3 rounded-xl text-lg hover:bg-blue-700 transition">
+            <Link to={'/signup'}>Get Started</Link>
+          </button>
+        )}
+
       </section>
 
       {/* Features Section */}

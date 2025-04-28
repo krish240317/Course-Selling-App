@@ -10,7 +10,7 @@ import Container from "./container/Container";
 import Logo from "./Logo";
 import HomePage from "./Home";
 import AddContent from "./AddContent";
-
+import Dashboard from "./Dashboard";
 export {
     Header,
     Footer,
@@ -24,4 +24,5 @@ export {
     Logo,
     HomePage,
     AddContent,
+    Dashboard
 }
