@@ -2,7 +2,7 @@ import React from 'react'
 import { useSelector } from "react-redux"
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import { Container, Logo } from "../index.js"
+import { Container, Logo,LogoutBtn } from "../index.js"
 import "../../css/Header.css"
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet"></link>
 const Header = () => {
@@ -39,7 +39,7 @@ const Header = () => {
             )}
             {authStatus && (
               <li>
-                {/* <LogoutBtn /> */}
+                <LogoutBtn />
               </li>
             )}
           </ul>

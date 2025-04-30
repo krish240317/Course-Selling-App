@@ -11,6 +11,8 @@ import Logo from "./Logo";
 import HomePage from "./Home";
 import AddContent from "./AddContent";
 import Dashboard from "./Dashboard";
+import LogoutBtn from './Header/LogoutBtn'
+import UploadContent from "./UploadContent";
 export {
     Header,
     Footer,
@@ -24,5 +26,7 @@ export {
     Logo,
     HomePage,
     AddContent,
-    Dashboard
+    Dashboard,
+    LogoutBtn,
+    UploadContent
 }
