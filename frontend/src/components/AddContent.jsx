@@ -1,9 +1,7 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import "../css/AddCourse.css";
-
 const AddContent = () => {
   const navigate = useNavigate();
   const {
@@ -13,30 +11,9 @@ const AddContent = () => {
   } = useForm();
 
   const onSubmit = async (data) => {
-    try {
-      const token = localStorage.getItem('accessToken');
 
-      if (!token) {
-        alert('No access token found. Please log in.');
-        return;
-      }
-      // const response = await axios.post(`${String(import.meta.env.VITE_API_URL)}/addcourse`, data, {
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${token}`,
-      //   },
-      // });
+    navigate('/uploadvideo', { state: { formData: data } });
 
-      // if (response.data.success) {
-      // const courseId=response.data.data._id;
-    
-
-      //   alert('Course added successfully!');
-        navigate('/uploadvideo', { state: { formData: data } });
-      
-    } catch (error) {
-      console.error('Error:', error.message);
-    }
   };
 
   return (

@@ -8,7 +8,7 @@ const generateAccessToken = (user) => {
         },
         process.env.ACCESS_TOKEN,
         {
-            expiresIn: "20m"
+            expiresIn: "2m"
         }
 
     );
@@ -17,7 +17,6 @@ const generateAccessToken = (user) => {
 
 const generateAccessAndRefreshToken = async (user) => {
     try {
-        // console.log("ID",user);
         const accessToken = generateAccessToken(user);
 
         return { accessToken };
