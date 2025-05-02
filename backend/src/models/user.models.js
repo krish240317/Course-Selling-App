@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
   password: {type:String, require: true}, 
   role: { type: String, enum: ["student", "instructor", "admin"], default: "student" },
   enrolledCourses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Course" }],
-  createdCourses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Course" }], // if instructor
+  createdCourses:   [{ type: mongoose.Schema.Types.ObjectId, ref: "Course" }], // if instructor
   createdAt: { type: Date, default: Date.now }
 });
 

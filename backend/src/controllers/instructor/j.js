@@ -5,34 +5,33 @@ import FormData from 'form-data';
 import axios from 'axios';
 import { Buffer } from 'buffer';
 import { User } from '../../models/user.models.js';
+export const addcourse = asyncHandler(async (req, res) => {
+  try {
+    const InstructorId = req.user._id;
+    const { title, description, category, price } = req.body;
 
-// export const addcourse = asyncHandler(async (req, res) => {
-//   try {
-//     const InstructorId = req.user._id;
-//     const { title, description, category, price } = req.body;
+    const addedcourse = await Course.create({
+      title,
+      description,
+      category,
+      price,
+      instructor: InstructorId,
+    });
 
-//     const addedcourse = await Course.create({
-//       title,
-//       description,
-//       category,
-//       price,
-//       instructor: InstructorId,
-//     });
+    const confirm = await Course.findById(addedcourse._id);
 
-//     const confirm = await Course.findById(addedcourse._id);
-
-//     return res.json(
-//       new ApiResponse(200, confirm, 'title,description,category added Successfully')
-//     );
-//   } catch (error) {
-//     console.error('Error adding course:', error);
-//     return res.status(500).json(new ApiResponse(500, null, 'Internal Server Error'));
-//   }
-// });
-
+    return res.json(
+      new ApiResponse(200, confirm, 'title,description,category added Successfully')
+    );
+  } catch (error) {
+    console.error('Error adding course:', error);
+    return res.status(500).json(new ApiResponse(500, null, 'Internal Server Error'));
+  }
+});
 export const addContent = asyncHandler(async (req, res) => {
   try {
-    const { subtitle, title, description, category, price } = req.body;
+    const { subtitle } = req.body;
+    console.log(subtitle);
     const instructorId = req.user._id;
     const file = req.file;
 
@@ -50,7 +49,7 @@ export const addContent = asyncHandler(async (req, res) => {
     });
 
     let response;
-    // console.log("KEY", process.env.PIXELDRAIN_API_KEY);
+    console.log("KEY", process.env.PIXELDRAIN_API_KEY);
     try {
       response = await axios.post('https://pixeldrain.com/api/file', form, {
         headers: {
@@ -66,39 +65,46 @@ export const addContent = asyncHandler(async (req, res) => {
     }
 
     const pixeldrainId = response.data.id;
-    if (!response || !response.data.id) {
-      console.error('Error adding course:');
-      return res.status(500).json(new ApiResponse(500, null, 'Internal Server Error'));
-    }
     const fileLink = `https://pixeldrain.com/u/${pixeldrainId}`;
 
-    // Create the course with content included
-    let addedCourse;
+    let course;
     try {
-      addedCourse = await Course.create({
-        title,
-        description,
-        category,
-        price,
-        instructor: instructorId,
-        content: [
-          {
-            subtitle,
-            type: 'video',
-            url: fileLink,
+      course = await Course.findOne({ instructor: instructorId });
+      if (!course) {
+        throw new Error('Course not found');
+      }
+    } catch (findError) {
+      console.error('Error finding course:', findError);
+      return res.status(404).json(new ApiResponse(404, null, 'Course not found'));
+    }
+
+    let updatedCourse;
+    try {
+      updatedCourse = await Course.findByIdAndUpdate(
+        course._id,
+        {
+          $push: {
+            content: {
+              subtitle,
+              type: 'video',
+              url: fileLink,
+            },
           },
-        ],
-      });
-    } catch (creationError) {
-      console.error('Error creating course:', creationError);
+        },
+        { new: true }
+      );
+    } catch (updateError) {
+      console.error('Error updating course:', updateError);
       return res
         .status(500)
-        .json(new ApiResponse(500, null, 'Failed to create course with content'));
+        .json(new ApiResponse(500, null, 'Failed to update course content'));
     }
+
+    // Add the course ID to the instructor's createdCourses array
     try {
       await User.findByIdAndUpdate(
         instructorId,
-        { $addToSet: { createdCourses: addedCourse._id} }, // Use $addToSet to avoid duplicates
+        { $addToSet: { createdCourses: course._id } }, // Use $addToSet to avoid duplicates
         { new: true }
       );
     } catch (userUpdateError) {
@@ -109,7 +115,7 @@ export const addContent = asyncHandler(async (req, res) => {
     }
 
     return res.json(
-      new ApiResponse(200, addedCourse, 'Successfully added course with video content')
+      new ApiResponse(200, fileLink, updatedCourse, 'Successfully added video and updated user')
     );
   } catch (error) {
     console.error('Error in addContent:', error);
