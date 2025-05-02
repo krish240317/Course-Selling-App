@@ -8,7 +8,7 @@ const generateAccessToken = (user) => {
         },
         process.env.ACCESS_TOKEN,
         {
-            expiresIn: "2m"
+            expiresIn: "1d"
         }
 
     );

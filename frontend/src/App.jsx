@@ -10,7 +10,8 @@ import { Provider } from 'react-redux'
 import Protected from './components/AuthLayout'
 import AddContent from './pages/AddContent'
 import Dashboard from './pages/Dashboard'
-import  UploadContent  from './pages/UploadContent'
+import UploadContent from './pages/UploadContent'
+import AppWrapper from './utils/AppWrapper'
 const App = () => {
   return (
     <>
@@ -18,16 +19,18 @@ const App = () => {
 
 
         <BrowserRouter>
-          <Header />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/signup" element={<Protected authentication={false}><Signup /></Protected>} />
-            <Route path="/login" element={<Protected authentication={false}><Login /></Protected>} />
-            <Route path="/dashboard" element={<Protected authentication><Dashboard /></Protected>} />
-            <Route path="/addcontent" element={<Protected authentication><AddContent /></Protected>} />
-            <Route path="/uploadvideo" element={<Protected authentication><UploadContent /></Protected>} />
-          </Routes>
-          <Footer />
+          <AppWrapper>
+            <Header />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/signup" element={<Protected authentication={false}><Signup /></Protected>} />
+              <Route path="/login" element={<Protected authentication={false}><Login /></Protected>} />
+              <Route path="/dashboard" element={<Protected authentication><Dashboard /></Protected>} />
+              <Route path="/addcontent" element={<Protected authentication><AddContent /></Protected>} />
+              <Route path="/uploadvideo" element={<Protected authentication><UploadContent /></Protected>} />
+            </Routes>
+            <Footer />
+          </AppWrapper>
         </BrowserRouter>
 
       </Provider>
