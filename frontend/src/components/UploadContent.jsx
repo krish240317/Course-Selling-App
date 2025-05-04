@@ -6,6 +6,7 @@ import "../css/UploadContent.css";
 const UploadContent = () => {
   const [subtitle, setSubtitle] = useState('');
   const [file, setFile] = useState(null);
+  const [image, setImage] = useState(null); // State for image file
   const [message, setMessage] = useState('');
   const [uploadProgress, setUploadProgress] = useState(0); // State for upload progress
   const [isUploading, setIsUploading] = useState(false); // State to disable button
@@ -17,17 +18,22 @@ const UploadContent = () => {
     setFile(e.target.files[0]);
   };
 
+  const handleImageChange = (e) => {
+    setImage(e.target.files[0]); // Handle image file change
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!file || !subtitle) {
-      setMessage('Please provide both a subtitle and a video file.');
+    if (!file || !subtitle || !image) {
+      setMessage('Please provide a subtitle, video file, and image.');
       return;
     }
 
     const formData = new FormData();
     formData.append('subtitle', subtitle);
     formData.append('video', file);
+    formData.append('image', image); // Append image file
     formData.append('title', details.title);
     formData.append('description', details.description);
     formData.append('category', details.category);
@@ -92,6 +98,17 @@ const UploadContent = () => {
             className="form-input"
             accept="video/*"
             onChange={handleFileChange}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="image" className="form-label">Image File:</label>
+          <input
+            type="file"
+            id="image"
+            className="form-input"
+            accept="image/*"
+            onChange={handleImageChange}
             required
           />
         </div>

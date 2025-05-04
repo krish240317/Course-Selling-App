@@ -13,6 +13,7 @@ import AddContent from "./AddContent";
 import Dashboard from "./Dashboard";
 import LogoutBtn from './Header/LogoutBtn'
 import UploadContent from "./UploadContent";
+import VideoDetails from "./VideoDetails";
 export {
     Header,
     Footer,
@@ -28,5 +29,6 @@ export {
     AddContent,
     Dashboard,
     LogoutBtn,
-    UploadContent
+    UploadContent,
+    VideoDetails
 }

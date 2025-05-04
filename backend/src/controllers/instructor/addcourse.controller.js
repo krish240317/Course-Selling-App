@@ -1,76 +1,83 @@
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import { Course } from '../../models/course.models.js';
 import { ApiResponse } from '../../utils/ApiResponse.js';
-import FormData from 'form-data';
-import axios from 'axios';
-import { Buffer } from 'buffer';
+import AWS from 'aws-sdk';
+import cloudinary from 'cloudinary';
 import { User } from '../../models/user.models.js';
 
-// export const addcourse = asyncHandler(async (req, res) => {
-//   try {
-//     const InstructorId = req.user._id;
-//     const { title, description, category, price } = req.body;
+// Configure Cloudinary
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-//     const addedcourse = await Course.create({
-//       title,
-//       description,
-//       category,
-//       price,
-//       instructor: InstructorId,
-//     });
-
-//     const confirm = await Course.findById(addedcourse._id);
-
-//     return res.json(
-//       new ApiResponse(200, confirm, 'title,description,category added Successfully')
-//     );
-//   } catch (error) {
-//     console.error('Error adding course:', error);
-//     return res.status(500).json(new ApiResponse(500, null, 'Internal Server Error'));
-//   }
-// });
+// Configure AWS S3
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+});
 
 export const addContent = asyncHandler(async (req, res) => {
   try {
     const { subtitle, title, description, category, price } = req.body;
     const instructorId = req.user._id;
-    const file = req.file;
 
-    if (!file) {
-      return res.status(400).send('No file uploaded.');
-    }
+    const videoFile = req.files?.video?.[0];
+    const imageFile = req.files?.image?.[0];
 
-    const fileName = Date.now() + '-' + file.originalname;
-
-    // Prepare form data for PixelDrain
-    const form = new FormData();
-    form.append('file', file.buffer, {
-      filename: fileName,
-      contentType: file.mimetype,
-    });
-
-    let response;
-    // console.log("KEY", process.env.PIXELDRAIN_API_KEY);
-    try {
-      response = await axios.post('https://pixeldrain.com/api/file', form, {
-        headers: {
-          ...form.getHeaders(),
-          Authorization: `Basic ${Buffer.from(`:${process.env.PIXELDRAIN_API_KEY}`).toString('base64')}`,
-        },
-      });
-    } catch (uploadError) {
-      console.error('Error uploading file to PixelDrain:', uploadError);
+    if (!videoFile || !imageFile) {
       return res
-        .status(500)
-        .json(new ApiResponse(500, null, 'Failed to upload file to PixelDrain'));
+        .json(new ApiResponse(400, null, 'Both video and image files are required.'));
     }
 
-    const pixeldrainId = response.data.id;
-    if (!response || !response.data.id) {
-      console.error('Error adding course:');
-      return res.status(500).json(new ApiResponse(500, null, 'Internal Server Error'));
+    // Upload video to AWS S3
+    const videoFileName = Date.now() + '-' + videoFile.originalname;
+    const videoParams = {
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Key: `videos/${videoFileName}`,
+      Body: videoFile.buffer,
+      ContentType: videoFile.mimetype,
+    };
+
+    let videoUrl;
+    try {
+      const videoUploadResponse = await s3.upload(videoParams).promise();
+      videoUrl = videoUploadResponse.Location; // Get the S3 file URL
+    } catch (uploadError) {
+      console.error('Error uploading video to S3:', uploadError);
+      return res
+        .json(new ApiResponse(500, null, 'Failed to upload video to S3'));
     }
-    const fileLink = `https://pixeldrain.com/u/${pixeldrainId}`;
+
+    // Upload image to Cloudinary
+    const uploadImageToCloudinary = (imageBuffer) => {
+      return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.v2.uploader.upload_stream(
+          {
+            resource_type: 'image',
+            folder: "uploads",
+          },
+          (error, result) => {
+            if (error) {
+              return reject(new Error('Failed to upload image to Cloudinary'));
+            }
+            resolve(result.secure_url); // Resolve the secure URL
+          }
+        );
+        uploadStream.end(imageBuffer);
+      });
+    };
+
+    let imageUrl;
+    try {
+      imageUrl = await uploadImageToCloudinary(imageFile.buffer);
+    } catch (imageUploadError) {
+      console.error('Error uploading image to Cloudinary:', imageUploadError);
+      return res
+        .json(new ApiResponse(500, null, 'Failed to upload image to Cloudinary'));
+    }
 
     // Create the course with content included
     let addedCourse;
@@ -85,34 +92,36 @@ export const addContent = asyncHandler(async (req, res) => {
           {
             subtitle,
             type: 'video',
-            url: fileLink,
+            url: videoUrl,
           },
         ],
+        thumbnailUrl: imageUrl, // Save the Cloudinary image URL
       });
     } catch (creationError) {
       console.error('Error creating course:', creationError);
       return res
-        .status(500)
         .json(new ApiResponse(500, null, 'Failed to create course with content'));
     }
+
+    // Update the instructor's createdCourses
     try {
       await User.findByIdAndUpdate(
         instructorId,
-        { $addToSet: { createdCourses: addedCourse._id} }, // Use $addToSet to avoid duplicates
+        { $addToSet: { createdCourses: addedCourse._id } }, // Use $addToSet to avoid duplicates
         { new: true }
       );
     } catch (userUpdateError) {
       console.error('Error updating user createdCourses:', userUpdateError);
       return res
-        .status(500)
         .json(new ApiResponse(500, null, 'Failed to update user createdCourses'));
     }
 
     return res.json(
-      new ApiResponse(200, addedCourse, 'Successfully added course with video content')
+      new ApiResponse(200, addedCourse, 'Successfully added course with video and image content')
     );
   } catch (error) {
     console.error('Error in addContent:', error);
-    return res.status(500).json(new ApiResponse(500, null, 'Internal Server Error'));
+    return res
+      .json(new ApiResponse(500, null, 'Internal Server Error'));
   }
 });

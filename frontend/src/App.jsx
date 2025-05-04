@@ -12,6 +12,7 @@ import AddContent from './pages/AddContent'
 import Dashboard from './pages/Dashboard'
 import UploadContent from './pages/UploadContent'
 import AppWrapper from './utils/AppWrapper'
+import VideoDetails from './pages/VideoDetails'
 const App = () => {
   return (
     <>
@@ -28,6 +29,7 @@ const App = () => {
               <Route path="/dashboard" element={<Protected authentication><Dashboard /></Protected>} />
               <Route path="/addcontent" element={<Protected authentication><AddContent /></Protected>} />
               <Route path="/uploadvideo" element={<Protected authentication><UploadContent /></Protected>} />
+              <Route path="/video/:id" element={<Protected authentication><VideoDetails /></Protected>} /> {/* New Route */}
             </Routes>
             <Footer />
           </AppWrapper>

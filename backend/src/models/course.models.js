@@ -5,7 +5,7 @@ const courseSchema = new mongoose.Schema({
   title: String,
   description: String,
   category: String,
-  // thumbnailUrl: String,
+  thumbnailUrl: String,
   instructor: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   content: [{
     subtitle: String,
