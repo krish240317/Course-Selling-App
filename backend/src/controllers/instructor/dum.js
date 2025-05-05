@@ -1,7 +1,6 @@
-import React from 'react'
-
-const dum = (req,res) => {
- return res.status(200);
-}
-
-export default dum
+import { ApiResponse } from "../../utils/ApiResponse.js";
+const dum = (req, res) => {
+    return res.json(new ApiResponse(200,"Verified"));
+  };
+  
+  export default dum;

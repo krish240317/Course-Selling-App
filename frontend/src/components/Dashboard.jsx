@@ -1,60 +1,98 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import "../css/Dshboard.css";
 
 const Dashboard = () => {
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const token = localStorage.getItem('accessToken'); // Assuming token is stored in localStorage
+        setLoading(true);
+        const token = localStorage.getItem('accessToken');
+
+        if (!token) {
+          setError('No access token found. Please login again.');
+          navigate('/login');
+          return;
+        }
+
         const response = await axios.get(`${String(import.meta.env.VITE_API_URL)}/getcourse`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
         });
+
         if (response.data.success) {
           setData(response.data.data);
         } else {
-          console.error('Failed to fetch courses:', response.data.message);
+          setError(response.data.message || 'Failed to fetch courses');
         }
       } catch (error) {
         console.error('Error fetching courses:', error);
+        setError(error.response?.data?.message || 'Failed to load courses');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchCourses();
-  }, []);
+  }, [navigate]);
 
   const handleVideoClick = (video) => {
     navigate(`/video/${video._id}`, { state: video });
   };
 
+  if (loading) {
+    return (
+      <div className="dashboard-container">
+        <div className="loading-spinner">Loading courses...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="dashboard-container">
+        <div className="error-message">
+          {error}
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="dashboard-container">
+        <div className="no-courses-message">
+          No courses available at the moment.
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', padding: '20px' }}>
+    <div className="dashboard-container">
       {data.map((video) => (
         <div
           key={video._id}
-          style={{
-            width: '300px',
-            border: '1px solid #ddd',
-            borderRadius: '8px',
-            overflow: 'hidden',
-            cursor: 'pointer',
-          }}
+          className="dashboard-card"
           onClick={() => handleVideoClick(video)}
         >
           <img
             src={video.thumbnailUrl}
             alt={video.title}
-            style={{ width: '100%', height: '200px', objectFit: 'cover' }}
+            className="dashboard-thumbnail"
           />
-          <div style={{ padding: '10px' }}>
-            <h3 style={{ fontSize: '18px', margin: '0 0 10px' }}>{video.title}</h3>
-            <p style={{ margin: '0 0 10px', color: '#555' }}>{video.content[0].subtitle}</p>
-            <p style={{ margin: '0', fontWeight: 'bold' }}>${video.price}</p>
+          <div className="dashboard-card-content">
+            <h3 className="dashboard-title">{video.title}</h3>
+            <p className="dashboard-subtitle">{video.content[0].subtitle}</p>
+            <p className="dashboard-price">${video.price}</p>
           </div>
         </div>
       ))}

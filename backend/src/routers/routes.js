@@ -6,6 +6,6 @@ const router = Router();
 
 router.route("/signup").post(signup);
 router.route("/login").post(login);
-router.route("/verify").post(verifyJwt,dum);
+router.route("/verify").get(verifyJwt,dum);
 
 export default router;

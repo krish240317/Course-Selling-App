@@ -1,7 +1,7 @@
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import { Course } from '../../models/course.models.js';
 import { ApiResponse } from '../../utils/ApiResponse.js';
-import AWS from 'aws-sdk';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import cloudinary from 'cloudinary';
 import { User } from '../../models/user.models.js';
 
@@ -12,11 +12,13 @@ cloudinary.v2.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Configure AWS S3
-const s3 = new AWS.S3({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+// Configure AWS S3 Client
+const s3Client = new S3Client({
   region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
 });
 
 export const addContent = asyncHandler(async (req, res) => {
@@ -43,8 +45,8 @@ export const addContent = asyncHandler(async (req, res) => {
 
     let videoUrl;
     try {
-      const videoUploadResponse = await s3.upload(videoParams).promise();
-      videoUrl = videoUploadResponse.Location; // Get the S3 file URL
+      await s3Client.send(new PutObjectCommand(videoParams));
+      videoUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/videos/${videoFileName}`;
     } catch (uploadError) {
       console.error('Error uploading video to S3:', uploadError);
       return res
